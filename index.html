@@ -1,22 +1,153 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <title>My Embedded Editor</title>
-    <!-- CodeMirror CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
-  </head>
-  <body>
-    <h1>Embedded Code Editor Example</h1>
-    <textarea id="editor">// Write your code here!</textarea>
-    <!-- CodeMirror JS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
-    <script>
-      var editor = CodeMirror.fromTextArea(document.getElementById("editor"), {
-        lineNumbers: true,
-        mode: "javascript",
-        theme: "default"
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Monaco Editor on GitHub Pages</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* Place your CSS here or in style.css file */
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f5f6fa;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #24292f;
+      color: #fff;
+      padding: 1em 2em;
+      text-align: center;
+      letter-spacing: 2px;
+    }
+    #editor-container {
+      margin: 2em auto;
+      min-width: 320px;
+      max-width: 900px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(44,62,80,0.08);
+      padding: 1em 1em 2em 1em;
+    }
+    #monaco {
+      width: 100%;
+      height: 400px;
+      border: 1px solid #ececec;
+      border-radius: 8px;
+      margin-bottom: 1em;
+    }
+    .actions {
+      display: flex;
+      gap: 1em;
+      flex-wrap: wrap;
+      margin-bottom: 1em;
+    }
+    button, .gh-login {
+      background: #2ea44f;
+      color: #fff;
+      border: none;
+      padding: 0.7em 1.5em;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.2s;
+      text-decoration: none;
+      display: inline-block;
+    }
+    button:hover, .gh-login:hover {
+      background: #218838;
+    }
+    .status {
+      margin-top: 1em;
+      min-height: 24px;
+      font-size: 1em;
+      color: #2c3e50;
+    }
+    .footer {
+      margin-top: 2em;
+      text-align: center;
+      color: #999;
+      font-size: 0.95em;
+      padding-bottom: 2em;
+    }
+  </style>
+  <!-- Monaco loader from CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/loader.js"></script>
+</head>
+<body>
+  <header>
+    <h1>Monaco Editor Playground &mdash; GitHub Pages</h1>
+  </header>
+  <div id="editor-container">
+    <div id="monaco"></div>
+    <div class="actions">
+      <button id="save">Save Locally</button>
+      <button id="share-pr">Share via Pull Request</button>
+      <!-- The "Share via PR" button will trigger GitHub Auth and PR creation -->
+      <a class="gh-login" id="github-login" href="#" style="display:none;">Login with GitHub</a>
+    </div>
+    <div class="status" id="status"></div>
+  </div>
+  <div class="footer">
+    Monaco Editor on GitHub Pages &copy; 2025 &mdash; <a href="https://github.com/yourusername/yourrepo" target="_blank">GitHub Repo</a>
+  </div>
+  <script>
+    // Monaco Loader
+    require.config({ paths: { 'vs': 'https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs' }});
+    let editor;
+    require(['vs/editor/editor.main'], function () {
+      editor = monaco.editor.create(document.getElementById('monaco'), {
+        value: [
+          '// Welcome to Monaco Editor on GitHub Pages!',
+          'function hello() {',
+          '  alert("Hello, world!");',
+          '}'
+        ].join('\n'),
+        language: 'javascript',
+        theme: 'vs-dark',
+        automaticLayout: true
       });
-    </script>
-  </body>
+    });
+
+    // Save locally
+    document.getElementById('save').onclick = function() {
+      const code = editor.getValue();
+      localStorage.setItem('monaco-code', code);
+      document.getElementById('status').textContent = 'Saved to your browser (localStorage).';
+    };
+
+    // Load from localStorage if present
+    window.onload = function() {
+      const saved = localStorage.getItem('monaco-code');
+      if (saved && editor) {
+        editor.setValue(saved);
+      }
+    };
+
+    // --- GitHub PR Feature (outline) ---
+    document.getElementById('share-pr').onclick = async function() {
+      document.getElementById('status').textContent = 'Authenticating with GitHub...';
+
+      // 1. Authenticate user via OAuth (requires creating a GitHub OAuth app)
+      // 2. On success, use GitHub API to:
+      //    a. Fork the repo (if not already forked)
+      //    b. Create a new branch in the fork
+      //    c. Commit the code as a file (e.g., code.js) in the branch
+      //    d. Create a Pull Request from fork/branch to upstream/main
+      // 3. Show PR link/status to user
+
+      // This requires Octokit.js and a GitHub OAuth app redirect flow!
+      // For production, see:
+      // - https://github.com/octokit/octokit.js
+      // - https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app
+
+      // For demo, just show a message:
+      document.getElementById('status').innerHTML = 
+        'This would open a GitHub OAuth login and create a PR with your changes.<br>' +
+        '<b>See source code for integration details.</b>';
+      document.getElementById('github-login').style.display = 'inline-block';
+      // You would programmatically trigger GitHub OAuth and handle the PR via API here.
+    };
+  </script>
+</body>
 </html>
